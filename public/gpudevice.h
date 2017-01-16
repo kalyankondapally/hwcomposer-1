@@ -24,9 +24,6 @@
 
 #include <drmscopedtypes.h>
 #include <scopedfd.h>
-#include <spinlock.h>
-
-#include <hwcthread.h>
 
 namespace hwcomposer {
 
@@ -50,40 +47,8 @@ class GpuDevice {
   NativeDisplay* GetVirtualDisplay();
 
  private:
-  class DisplayManager : public HWCThread {
-   public:
-    DisplayManager();
-    ~DisplayManager();
-
-    bool Init(uint32_t fd);
-
-    bool UpdateDisplayState();
-
-    NativeDisplay* GetDisplay(uint32_t display);
-
-    NativeDisplay* GetVirtualDisplay();
-
-   protected:
-    void Routine() override;
-
-   private:
-    void HotPlugEventHandler();
-#ifdef UDEV_SUPPORT
-    struct udev* udev_;
-    struct udev_monitor* monitor_;
-#endif
-    std::unique_ptr<NativeBufferHandler> buffer_handler_;
-    std::unique_ptr<NativeDisplay> headless_;
-    std::unique_ptr<NativeDisplay> virtual_display_;
-    std::vector<std::unique_ptr<NativeDisplay>> displays_;
-    int fd_;
-    ScopedFd hotplug_fd_;
-    uint32_t select_fd_;
-    fd_set fd_set_;
-    SpinLock spin_lock_;
-  };
-
-  DisplayManager display_manager_;
+  class DisplayManager;
+  std::unique_ptr<DisplayManager> display_manager_;
   ScopedFd fd_;
   bool initialized_;
 };
